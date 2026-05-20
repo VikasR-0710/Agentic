@@ -84,7 +84,7 @@ OWNER_REGION_MAP={
 "Santosh Veduruvada":"EMEA",
 "Sivagnana Bharathi Nagaraj":"EMEA",
 "Ullas Shenoy":"EMEA",
-"Vipul S G":"EMEA",
+"Vipul SG":"EMEA",
 "Vilas Potadar":"EMEA",
 "Chethan Kumar P.":"EMEA",
 "Amith Gujjar":"EMEA",
@@ -115,7 +115,7 @@ OWNER_REGION_MAP={
 "Selvin Raja":"NA WEST",
 "Shakti Prasad Pati":"NA WEST",
 "Sanjay Kademani":"NA WEST",
-"Shreyas Nambiar":"NA WEST",
+"Shreyas G Nambiar":"NA WEST",
 "Vishal Mavi":"NA WEST",
 "Infant Raj.":"NA WEST",
 "Pallavi M R":"NA WEST",
@@ -221,28 +221,7 @@ for case in cases:
     )
 
     region = get_region(owner_name)
-    last_commenter = "No Public Comment"
-    comments = (case.get(
-       "CaseComments") or 
-       {}
-   ).get(
-       "records",
-       []
-   )
-    if comments:
-       latest = comments[0]
-       created_by = (
-           latest.get(
-               "CreatedBy"
-           ) or {}
-       ).get(
-           "Name",
-           ""
-       )
-       if created_by in OWNER_REGION_MAP:
-           last_commenter = "Xactly"
-       else:
-           last_commenter = "Customer"
+
     dashboard.append({
 
         "Region": region,
@@ -263,7 +242,7 @@ for case in cases:
         ),
 
         "Escalated": escalated,
-        "Last Comment By":last_commenter,
+
         "Sentiment": st.session_state.sentiments.get(
             case.get("CaseNumber"),
             "Not Analyzed"
@@ -374,23 +353,22 @@ with left:
     with report_box:
 
         openai_service = OpenAIService()
-        headers = st.columns([1,1.4,3,2.2,1.5,1.3,1.4,2.5,1.6])
+        headers = st.columns([1,1,2.5,2,1.2,1.2,1,1.5])
 
         headers[0].write("Region")
         headers[1].write("Case")
         headers[2].write("Customer")
         headers[3].write("Owner")
-        headers[4].write("Support Level")
+        headers[4].write("Support")
         headers[5].write("Status")
         headers[6].write("Escalated")
-        headers[7].write("Last Comment")
-        headers[8].write("Sentiment")
-        
+        headers[7].write("Sentiment")
+
         st.markdown("---")
         for index,row in filtered_df.iterrows():
 
             cols = st.columns(
-                [1,1.4,3,2.2,1.5,1.3,1.4,2.5,1.6]
+                [1,1,2.5,2,1.2,1.2,1,1.5]
             )
 
             cols[0].write(
@@ -421,15 +399,12 @@ with left:
                 "Yes" if row["Escalated"]
                 else "No"
             )
-            cols[7].write(
-                row["Last Comment By"]
-            )
 
             sentiment=row["Sentiment"]
 
             if sentiment=="Not Analyzed":
 
-                if cols[8].button(
+                if cols[7].button(
                     ":brain: Analyze",
                     key=f"analyze_{row['Case Number']}"
                 ):

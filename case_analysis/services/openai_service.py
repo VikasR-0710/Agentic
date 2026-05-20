@@ -1,8 +1,5 @@
 from openai import OpenAI
-
-from case_analysis.config.settings import (
-    OPENAI_API_KEY
-)
+import os
 
 
 
@@ -11,29 +8,49 @@ class OpenAIService:
     def __init__(self):
 
         self.client = OpenAI(
-            api_key=OPENAI_API_KEY
+            api_key=os.getenv("OPENAI_API_KEY")
         )
 
-    def analyze_case(self, case):
+    def analyze_case(self, case_data):
 
         prompt = f"""
         Analyze this Salesforce support case.
 
+        Case Number:
+        {case_data.get("CaseNumber")}
+
         Subject:
-        {case['Subject']}
+        {case_data.get("Subject")}
 
         Status:
-        {case['Status']}
+        {case_data.get("Status")}
+
+        Customer:
+        {case_data.get("Account", {}).get("Name", "")}
+
+        Escalated:
+        {case_data.get("IsEscalated")}
+
+        Return ONLY one word:
+
+        Positive
+        Neutral
+        Negative
+        Critical
         """
 
         response = self.client.chat.completions.create(
-            model="gpt-4.1-mini",
+
+            model="gpt-4o-mini",
+
             messages=[
                 {
                     "role": "user",
                     "content": prompt
                 }
-            ]
+            ],
+
+            temperature=0
         )
 
-        return response.choices[0].message.content
+        return response.choices[0].message.content.strip()
